@@ -84,7 +84,7 @@ const createStudent = async (req, res) => {
 };
 
 // @desc    Get all students with pagination
-// @route   GET /api/student-form
+// @route   GET /api/admin-dashboard
 // @access  Public
 const getAllStudents = async (req, res) => {
   try {
@@ -121,7 +121,96 @@ const getAllStudents = async (req, res) => {
   }
 };
 
+// @desc    Get student by ID
+// @route   GET /api/admin-dashboard/:id
+// @access  Public
+const getStudentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Find student by ID
+    const student = await Student.findById(id).select('-__v');
+    
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: student
+    });
+    
+  } catch (error) {
+    logger.error(`Error fetching student by ID: ${error.message}`);
+    
+    // Handle invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid student ID format'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// @desc    Delete student by ID
+// @route   DELETE /api/admin-dashboard/:id
+// @access  Public
+const deleteStudentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Find and delete student by ID
+    const student = await Student.findByIdAndDelete(id);
+    
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student not found'
+      });
+    }
+    
+    logger.info(`Student deleted: ${student.name} (${student.email}) - ID: ${id}`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Student deleted successfully',
+      data: {
+        id: student._id,
+        name: student.name,
+        email: student.email
+      }
+    });
+    
+  } catch (error) {
+    logger.error(`Error deleting student by ID: ${error.message}`);
+    
+    // Handle invalid ObjectId
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid student ID format'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   createStudent,
-  getAllStudents
+  getAllStudents,
+  getStudentById,
+  deleteStudentById
 };

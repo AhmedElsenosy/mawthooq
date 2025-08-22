@@ -12,6 +12,7 @@ const logger = require('./utils/logger');
 const indexRoutes = require('./routes/index');
 const userRoutes = require('./routes/user.routes');
 const studentRoutes = require('./routes/student.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Create Express app
 const app = express();
@@ -46,7 +47,10 @@ const API_VERSION = process.env.API_VERSION || '/api/v1';
 
 app.use(API_VERSION, indexRoutes);
 app.use(`${API_VERSION}/users`, userRoutes);
+// Student form submission (POST only)
 app.use('/api/student-form', studentRoutes);
+// Admin dashboard (GET only)
+app.use('/api/admin-dashboard', adminRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -69,7 +73,8 @@ app.get('/', (req, res) => {
       health: '/health',
       api: API_VERSION,
       users: `${API_VERSION}/users`,
-      'student-form': '/api/student-form'
+      'student-form': '/api/student-form',
+      'admin-dashboard': '/api/admin-dashboard'
     }
   });
 });
